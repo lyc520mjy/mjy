@@ -1,0 +1,31 @@
+#ifndef STUDENT_SYSTEM_H
+#define STUDENT_SYSTEM_H
+
+#define MAX_STUDENTS 100
+#define ADMIN_USER "admin"
+#define ADMIN_PASS "admin123"
+
+typedef struct {
+    char id[20];
+    char name[50];
+    char password[20];
+    float score;
+} Student;
+
+extern Student students[MAX_STUDENTS];
+extern int student_count;
+extern char current_user_id[20];
+
+void load_data();
+void save_data();
+int login();
+void student_menu();
+void admin_menu();
+void modify_student_info();
+void view_student_score();
+void add_student();
+void delete_student();
+void list_all_students();
+void modify_student_score();
+
+#endif
