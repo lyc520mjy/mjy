@@ -1,0 +1,35 @@
+      save_data();
+            printf("学生删除成功！\n");
+            return;
+        }
+    }
+    printf("未找到该学生！\n");
+}
+
+void list_all_students() {
+    printf("\n%-15s %-15s %-10s\n", "学号", "姓名", "成绩");
+    printf("================================\n");
+    for (int i = 0; i < student_count; i++) {
+        printf("%-15s %-15s %-10.2f\n", 
+              students[i].id, students[i].name, students[i].score);
+    }
+}
+
+void modify_student_score() {
+    char id[20];
+    printf("输入学生学号: ");
+    scanf("%s", id);
+    
+    for (int i = 0; i < student_count; i++) {
+        if (strcmp(students[i].id, id) == 0) {
+            printf("当前成绩: %.2f\n", students[i].score);
+            printf("输入新成绩: ");
+            scanf("%f", &students[i].score);
+            save_data();
+            printf("成绩修改成功！\n");
+            return;
+        }
+    }
+    printf("未找到该学生！\n");
+}
+```
