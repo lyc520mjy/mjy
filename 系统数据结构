@@ -1,0 +1,12 @@
+typedef struct {
+    char id[20];        // 学号/管理员ID
+    char name[50];      // 姓名
+    char password[30];  // 密码
+    int is_admin;       // 身份标识 (0-学生, 1-管理员)
+} User;
+
+typedef struct {
+    char student_id[20];
+    char subject[50];
+    float score;
+} Grade;
