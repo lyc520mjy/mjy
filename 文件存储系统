@@ -1,0 +1,10 @@
+// 文件存储示例
+void save_users(User* users, int count) {
+    FILE* fp = fopen("users.dat", "wb");
+    fwrite(&count, sizeof(int), 1, fp);
+    fwrite(users, sizeof(User), count, fp);
+    fclose(fp);
+}
+
+// 数据加密/解密函数
+void encrypt_data(char* data) { /* AES/简单异或加密 */ }
