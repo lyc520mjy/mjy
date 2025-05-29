@@ -1,0 +1,216 @@
+#include "student_system.h"
+
+// 全局变量定义
+Student students[MAX_STUDENTS];
+int student_count = 0;
+char current_user_id[20] = "";
+
+int main() {
+    load_data();
+    
+    while (1) {
+        int role = login();
+        if (role == 1) {
+            student_menu();
+        } else if (role == 2) {
+            admin_menu();
+        } else {
+            printf("登录失败，请重试！\n");
+        }
+    }
+    
+    return 0;
+}
+
+void load_data() {
+    FILE *file = fopen("students.dat", "rb");
+    if (file) {
+        fread(&student_count, sizeof(int), 1, file);
+        fread(students, sizeof(Student), student_count, file);
+        fclose(file);
+    }
+}
+
+void save_data() {
+    FILE *file = fopen("students.dat", "wb");
+    if (file) {
+        fwrite(&student_count, sizeof(int), 1, file);
+        fwrite(students, sizeof(Student), student_count, file);
+        fclose(file);
+    }
+}
+
+int login() {
+    char username[20], password[20];
+    
+    printf("\n===== 登录系统 =====\n");
+    printf("用户名: ");
+    scanf("%s", username);
+    printf("密码: ");
+    
+    // 密码隐藏输入
+    int i = 0;
+    while (1) {
+        char ch = getch();
+        if (ch == 13) { // 回车键
+            password[i] = '\0';
+            break;
+        } else if (ch == 8) { // 退格键
+            if (i > 0) {
+                i--;
+                printf("\b \b");
+            }
+        } else {
+            password[i] = ch;
+            i++;
+            printf("*");
+        }
+    }
+    printf("\n");
+    
+    // 检查管理员登录
+    if (strcmp(username, ADMIN_USER) == 0 && strcmp(password, ADMIN_PASS) == 0) {
+        return 2; // 管理员
+    }
+    
+    // 检查学生登录
+    for (int i = 0; i < student_count; i++) {
+        if (strcmp(username, students[i].id) == 0 && strcmp(password, students[i].password) == 0) {
+            strcpy(current_user_id, students[i].id);
+            return 1; // 学生
+        }
+    }
+    
+    return 0; // 登录失败
+}
+
+void student_menu() {
+    while (1) {
+        printf("\n===== 学生菜单 =====\n");
+        printf("1. 修改个人信息\n");
+        printf("2. 查看成绩\n");
+        printf("3. 退出登录\n");
+        printf("请选择: ");
+        
+        int choice;
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                modify_student_info();
+                break;
+            case 2:
+                view_student_score();
+                break;
+            case 3:
+                strcpy(current_user_id, "");
+                return;
+            default:
+                printf("无效选择！\n");
+        }
+    }
+}
+
+void admin_menu() {
+    while (1) {
+        printf("\n===== 管理员菜单 =====\n");
+        printf("1. 添加学生\n");
+        printf("2. 删除学生\n");
+        printf("3. 修改学生信息\n");
+        printf("4. 查看所有学生\n");
+        printf("5. 修改学生成绩\n");
+        printf("6. 退出登录\n");
+        printf("请选择: ");
+        
+        int choice;
+        scanf("%d", &choice);
+        
+        switch (choice) {
+            case 1:
+                add_student();
+                break;
+            case 2:
+                delete_student();
+                break;
+            case 3:
+                modify_student_info();
+                break;
+            case 4:
+                list_all_students();
+                break;
+            case 5:
+                modify_student_score();
+                break;
+            case 6:
+                return;
+            default:
+                printf("无效选择！\n");
+        }
+    }
+}
+
+void modify_student_info() {
+    char id[20];
+    if (strcmp(current_user_id, "") == 0) { // 管理员操作
+        printf("输入要修改的学生学号: ");
+        scanf("%s", id);
+    } else { // 学生操作
+        strcpy(id, current_user_id);
+    }
+    
+    for (int i = 0; i < student_count; i++) {
+        if (strcmp(students[i].id, id) == 0) {
+            printf("输入新姓名: ");
+            scanf("%s", students[i].name);
+            printf("输入新密码: ");
+            scanf("%s", students[i].password);
+            save_data();
+            printf("信息修改成功！\n");
+            return;
+        }
+    }
+    printf("未找到该学生！\n");
+}
+
+void view_student_score() {
+    for (int i = 0; i < student_count; i++) {
+        if (strcmp(students[i].id, current_user_id) == 0) {
+            printf("学号: %s\n姓名: %s\n成绩: %.2f\n", 
+                  students[i].id, students[i].name, students[i].score);
+            return;
+        }
+    }
+}
+
+void add_student() {
+    if (student_count >= MAX_STUDENTS) {
+        printf("学生数量已达上限！\n");
+        return;
+    }
+    
+    Student s;
+    printf("输入学号: ");
+    scanf("%s", s.id);
+    printf("输入姓名: ");
+    scanf("%s", s.name);
+    printf("输入密码: ");
+    scanf("%s", s.password);
+    printf("输入成绩: ");
+    scanf("%f", &s.score);
+    
+    students[student_count++] = s;
+    save_data();
+    printf("学生添加成功！\n");
+}
+
+void delete_student() {
+    char id[20];
+    printf("输入要删除的学生学号: ");
+    scanf("%s", id);
+    
+    for (int i = 0; i < student_count; i++) {
+        if (strcmp(students[i].id, id) == 0) {
+            for (int j = i; j < student_count - 1; j++) {
+                students[j] = students[j + 1];
+            }
+            student_count--;
